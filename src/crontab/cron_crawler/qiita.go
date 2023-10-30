@@ -29,27 +29,24 @@ func (e Qiita) Run() ([]QiitaArticle, error) {
 	req, err := http.NewRequest("GET", e.Url, nil)
 
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
 	res, err := client.Do(req)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 	var qiitaArticle []QiitaArticle
 	if err = json.Unmarshal(body, &qiitaArticle); err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
+	fmt.Println(qiitaArticle)
 
 	return qiitaArticle, nil
 }

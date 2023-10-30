@@ -1,66 +1,64 @@
 package cron_crawler
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
-
 	"net/http"
+	"regexp"
+	"strings"
 )
 
-type Zenn struct {
+type ZennArticle struct {
 	Url string
 }
 
-type ZennArticlesResponse struct {
-	Articles []zennArticle `json:"articles"`
+var re = regexp.MustCompile(`<a href="(.+?)"`)
+
+func (e ZennArticle) Run() (string, error) {
+	return getHttpRequest(e.Url)
 }
 
-type zennArticle struct {
-	Slug string `json:"slug"`
+func (e ZennArticle) FindAmazonBook(url string) ([]string, error) {
+	html, err := getHttpRequest(url)
+	if err != nil {
+		return nil, err
+	}
+
+	matches := re.FindAllStringSubmatch(html, -1)
+	var result []string
+	if len(matches) != 0 {
+		for _, match := range matches {
+			if !strings.Contains(match[1], "www.amazon.co.jp") {
+				continue
+			}
+			result = append(result, match[1]) // グループ1（"(...)"部分）を抽出
+		}
+	}
+
+	return result, nil
 }
 
-// Run はZennから最新の記事を取得し、それらをリポジトリ層で保存します。
-// まずHTTPクライアントを作成し、指定したURLに対してGETリクエストを行います。
-// エラーが発生した場合はエラーメッセージを表示し、関数を終了します。
-// 次にレスポンスボディを読み取り、それをZennArticlesResponse構造体にアンマーシャルします。
-// エラーが発生した場合もエラーメッセージを表示し、関数を終了します。
-//
-// 次に、取得した各記事について、それぞれの詳細ページを取得します。
-// この際、記事に関連付けられた各タグも生成されます。
-// タグはリポジトリ層で検索し、存在しない場合は新たに保存します。
-// エラーが発生した場合はエラーメッセージを表示します。
-//
-// タグの生成が完了したら、新たにArticle構造体を作成し、記事情報をセットします。
-// これをarticlesスライスに追加します。
-//
-// 最後に、取得した各記事をリポジトリ層で保存します。
-// ここでもエラーメッセージを表示し、関数を終了します。
-func (e Zenn) Run() {
+func getHttpRequest(url string) (string, error) {
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", e.Url+"?order=latest", nil)
+
+	req, err := http.NewRequest("GET", url, nil)
 
 	if err != nil {
 		fmt.Println(err)
-		return
+		return "", err
 	}
 	res, err := client.Do(req)
 	if err != nil {
 		fmt.Println(err)
-		return
+		return "", err
 	}
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		fmt.Println(err)
-		return
-	}
-	var zenArticlesResponse ZennArticlesResponse
-	if err := json.Unmarshal(body, &zenArticlesResponse); err != nil {
-		fmt.Println(err)
-		return
+		return "", err
 	}
 
-	fmt.Println(zenArticlesResponse)
+	return string(body), nil
 }

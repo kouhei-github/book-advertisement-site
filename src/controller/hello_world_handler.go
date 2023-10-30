@@ -6,6 +6,7 @@ import (
 )
 
 func HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
 	if r.Method != "GET" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		json.NewEncoder(w).Encode(Response{
@@ -19,5 +20,4 @@ func HelloWorldHandler(w http.ResponseWriter, r *http.Request) {
 		Status: http.StatusOK,
 		Text:   "Welcome To My Hello World!",
 	})
-
 }

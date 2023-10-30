@@ -11,4 +11,6 @@ type Router struct {
 
 func (router *Router) GetRouter() {
 	router.Mutex.HandleFunc("/api/v1/hello-world", controller.HelloWorldHandler)
+	router.Mutex.HandleFunc("/api/v1/book/zenn", controller.BookInZennHandler)
+
 }

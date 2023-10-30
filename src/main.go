@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"github.com/awslabs/aws-lambda-go-api-proxy/httpadapter"
+	"github.com/kouhei-github/book-advertisement-site/crontab"
 	"github.com/kouhei-github/book-advertisement-site/route"
 	"github.com/kouhei-github/book-advertisement-site/utils/cors"
 
@@ -11,6 +12,9 @@ import (
 )
 
 func main() {
+	// crontabでジョブの実行
+	crontab.ToStartCron()
+
 	// ルーターの設定
 	router := route.Router{Mutex: http.NewServeMux()}
 	router.GetRouter()

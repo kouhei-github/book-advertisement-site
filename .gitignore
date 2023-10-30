@@ -108,4 +108,4 @@ src/.env
 .idea
 upload.sh
 .vscode
-/src/tmp
+/src/tmp/*

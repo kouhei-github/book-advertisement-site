@@ -4,8 +4,8 @@ WORKDIR /app
 
 RUN go install github.com/cosmtrek/air@v1.29.0
 
-#COPY ./src/go.mod /app
-#COPY ./src/go.sum /app
+COPY ./src/go.mod /app
+COPY ./src/go.sum /app
 COPY ./src /app
-#RUN CGO_ENABLED=0 go build -tags lambda.norpc -o main main.go
+RUN CGO_ENABLED=0 go build -tags lambda.norpc -o main main.go
 

@@ -6,7 +6,7 @@ services:
     build:
       context: .
       dockerfile: ./container/Dockerfile
-    #command: ${GOLANG_COMMAND}
+    command: ${GOLANG_COMMAND}
     stdin_open: true
     tty: true
     working_dir: /app

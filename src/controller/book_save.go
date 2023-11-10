@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kouhei-github/book-advertisement-site/crontab/cron_crawler"
+	"github.com/kouhei-github/book-advertisement-site/utils"
 	"io/ioutil"
 	"net/http"
 	"regexp"
@@ -73,6 +74,26 @@ func BookInZennHandler(w http.ResponseWriter, r *http.Request) {
 	wg.Wait()
 
 	//スプレッドに書き込み
+	spreadWriter, err := utils.NewSpreadSheetWriter("1mjk98TSpRJ2ixsYfJ5rp4Zw0Pr8EeDV_YNS5VdO4jnM")
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(err.Error())
+		return
+	}
+
+	var input [][]interface{}
+	for _, value := range result {
+		input = append(input, []interface{}{value})
+	}
+
+	sheetRange := "本!A:A"
+	err = spreadWriter.Write(sheetRange, input)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(err.Error())
+		return
+	}
+
 	json.NewEncoder(w).Encode(map[string][]string{"result": result})
 }
 
